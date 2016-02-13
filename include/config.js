@@ -112,12 +112,12 @@ Configuration.getBaseConfig = function(multisite) {
         siteRoot: 'http://localhost:8080',
 
         //The hostname or IP address that the web server instance will bind to
-        siteIP:   '10.134.40.148',
+        siteIP:   '0.0.0.0',
 
         //The primary port to listen for traffic on.  Some environment such as
         //heroku force you to use whatever port they have available.  In such cases
         //the port is passed as an environment variable.
-        sitePort: process.env.port || process.env.PORT || 8080,
+        sitePort: 8080,//process.env.port || process.env.PORT || 8080,
 
         //the absolute file path to the directory where installation lives
         docRoot:  Configuration.DOCUMENT_ROOT,
