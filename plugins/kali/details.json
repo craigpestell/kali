@@ -1,0 +1,50 @@
+{
+    "uid": "kali",
+    "name": "KaliProtectives",
+    "description": "The plugin that drives the theme for Kali Protectives",
+    "version": "0.1.0",
+    "pb_version": "0.5.x",
+    "author": {
+        "name": "Craig Pestell",
+        "email": "craigpestell@gmail.com",
+        "website": "",
+        "contributors": [
+            {
+                "name": "Craig Pestell",
+                "email": "craigpestell@gmail.com"
+            },
+            {
+                "name": "Julian Coffey",
+                "email": ""
+            }
+        ]
+    },
+    "settings": [
+        {
+            "name": "landing_page_headline",
+            "value": "Kali Protectives"
+        },
+        {
+            "name": "landing_page_subheader",
+            "value": "stuff..."
+        }
+    ],
+    "permissions": {
+        "ACCESS_USER": [],
+        "ACCESS_WRITER": [],
+        "ACCESS_EDITOR": [],
+        "ACCESS_MANAGING_EDITOR": []
+    },
+    "main_module": {
+        "path": "kali.js"
+    },
+    "theme": {
+        "settings": [],
+        "content_templates": [
+            {
+                "file": "index",
+                "name": "Default"
+            }
+        ]
+    }
+}
