@@ -136,7 +136,7 @@ Configuration.getBaseConfig = function(multisite) {
         db: {
             type:'mongo',
             servers: [
-                '127.0.0.1:27017'
+                '162.243.149.37:27017'
             ],
 
             //the name of the default DB for the system
