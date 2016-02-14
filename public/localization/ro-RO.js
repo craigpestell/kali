@@ -2,7 +2,6 @@ module.exports = {
     generic: {
         LOCALE_DISPLAY: 'Român (România)',
         PENCILBLUE: 'PencilBlue',
-        KALIPROTECTIVES: 'Kali Protectives',
         ALL_RIGHTS: 'Toate drepturile rezervate',
         NONE: 'Niciunul',
         LEFT: 'Stanga',

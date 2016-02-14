@@ -1,7 +1,6 @@
 module.exports = {
     generic: {
         LOCALE_DISPLAY: 'Nederlands',
-        KALIPROTECTIVES: 'Kali Protectives',
         PENCILBLUE: 'PencilBlue',
         ALL_RIGHTS: 'Alle rechten voorbehouden',
         NONE: 'Geen',

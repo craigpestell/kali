@@ -2,7 +2,6 @@ module.exports = {
     generic: {
         LOCALE_DISPLAY: '简体中文 (中国大陆)',
         PENCILBLUE: 'PencilBlue',
-        KALIPROTECTIVES: 'Kali Protectives',
         ALL_RIGHTS: '版权所有',
         NONE: '无',
         LEFT: '左对齐',
