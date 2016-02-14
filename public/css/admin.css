@@ -591,3 +591,9 @@ form .error
     box-sizing: border-box;
     -moz-box-sizing: border-box;
 }
+
+/* Bootstrap overrides */
+
+.navbar-brand {
+    height: 80px;
+}

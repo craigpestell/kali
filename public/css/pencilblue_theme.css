@@ -229,10 +229,3 @@ footer
         display: block;
     }
 }
-
-
-/* Bootstrap overrides */
-
-.navbar-brand {
-    height: 100px;
-}
