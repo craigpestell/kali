@@ -2,7 +2,6 @@
 .jshintrc
 .project
 .idea
-include/config.js
 public/media/
 public/docs/
 public/bower_components/

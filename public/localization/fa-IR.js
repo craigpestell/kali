@@ -2,6 +2,7 @@ module.exports = {
     generic: {
         LOCALE_DISPLAY: 'فارسی (ایران)',
         PENCILBLUE: 'پنسیل بلو',
+        KALIPROTECTIVES: 'Kali Protectives',
         ALL_RIGHTS: 'تمامی حقوق محفوط است.',
         NONE: 'هیچ',
         LEFT: 'چپ',

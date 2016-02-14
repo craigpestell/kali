@@ -1,6 +1,7 @@
 module.exports = {
     generic: {
         LOCALE_DISPLAY: 'Nederlands',
+        KALIPROTECTIVES: 'Kali Protectives',
         PENCILBLUE: 'PencilBlue',
         ALL_RIGHTS: 'Alle rechten voorbehouden',
         NONE: 'Geen',
@@ -22,7 +23,7 @@ module.exports = {
         WRITER: 'Schrijver',
         READER: 'Lezer',
         EDITOR: 'Bewerker',
-        MANAGING_EDITOR: 'Beherend bewerker', 
+        MANAGING_EDITOR: 'Beherend bewerker',
         ADMINISTRATOR: 'Administrator',
         COLUMN_INCHES: 'Kolom breedte (inches)',
         CONTENT: 'Inhoud',
@@ -72,7 +73,7 @@ module.exports = {
 		RESET_SETTINGS: 'Reset instellingen',
 		UNINSTALL: 'Deinstalleer',
 		INSTALL: 'Installeer',
-		ACTIVE_PLUGIN_DESCRIPTION: 'Plugins die reeds geïnstalleerd zijn en werken tijdens de opstart van het systeem.', 
+		ACTIVE_PLUGIN_DESCRIPTION: 'Plugins die reeds geïnstalleerd zijn en werken tijdens de opstart van het systeem.',
 		INACTIVE_PLUGIN_DESCRIPTION: 'Plugins die reeds geïnstalleerd zijn of deels geïnstalleerd zijn, maar niet correct opstarten.',
 		AVAILABLE_PLUGIN_DESCRIPTION: 'Plugins die beschikbaar zijn, gedownload zijn en klaar zijn om geïnstalleerd te worden.',
 		PLEASE_WAIT: 'Gelieve te wachten',

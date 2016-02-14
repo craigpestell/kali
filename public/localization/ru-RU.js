@@ -1,7 +1,8 @@
 module.exports = {
     generic: {
-        LOCALE_DISPLAY: 'Русский (РФ)', 
+        LOCALE_DISPLAY: 'Русский (РФ)',
         PENCILBLUE: 'PencilBlue',
+        KALIPROTECTIVES: 'Kali Protectives',
         ALL_RIGHTS: 'Все права защищены',
         NONE: 'Нет',
         LEFT: 'Лево',

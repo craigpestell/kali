@@ -2,6 +2,7 @@ module.exports = {
     generic: {
         LOCALE_DISPLAY: 'English (United States)',
         PENCILBLUE: 'PencilBlue',
+        KALIPROTECTIVES: 'Kali Protectives',
         ALL_RIGHTS: 'All rights reserved',
         NONE: 'None',
         LEFT: 'Left',
