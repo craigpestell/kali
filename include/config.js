@@ -112,7 +112,7 @@ Configuration.getBaseConfig = function(multisite) {
         siteRoot: 'http://45.55.25.163:8080',
 
         //The hostname or IP address that the web server instance will bind to
-        siteIP:   '0.0.0.0',
+        siteIP:   '45.55.25.163',
 
         //The primary port to listen for traffic on.  Some environment such as
         //heroku force you to use whatever port they have available.  In such cases
