@@ -109,10 +109,10 @@ Configuration.getBaseConfig = function(multisite) {
 
         //The root of the site.  This host part should ALWAYS match the value of
         //the siteIP
-        siteRoot: 'http://localhost:8080',
+        siteRoot: process.env.DO ? 'http://45.55.25.163:8080': 'http://localhost:8080',
 
         //The hostname or IP address that the web server instance will bind to
-        siteIP:   '0.0.0.0',
+        siteIP:   process.env.DO ? '45.55.25.163' : '0.0.0.0',
 
         //The primary port to listen for traffic on.  Some environment such as
         //heroku force you to use whatever port they have available.  In such cases
