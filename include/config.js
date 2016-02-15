@@ -105,14 +105,14 @@ Configuration.getBaseConfig = function(multisite) {
     return {
 
         //The name of the site.
-        siteName: 'pencilblue',
+        siteName: 'Kali Protectives',
 
         //The root of the site.  This host part should ALWAYS match the value of
         //the siteIP
-        siteRoot: 'http://45.55.25.163:8080',
+        siteRoot: 'http://localhost:8080',
 
         //The hostname or IP address that the web server instance will bind to
-        siteIP:   '45.55.25.163',
+        siteIP:   '0.0.0.0',
 
         //The primary port to listen for traffic on.  Some environment such as
         //heroku force you to use whatever port they have available.  In such cases
@@ -135,8 +135,7 @@ Configuration.getBaseConfig = function(multisite) {
         //default configuration is meant for mongodb.
         db: {
             type:'mongo',
-            servers: [
-                '10.134.0.166:27017'
+            servers: [ process.env.DO ? '10.134.0.166:27017' : '162.243.149.37:27017'
             ],
 
             //the name of the default DB for the system

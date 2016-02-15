@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 .jshintrc
 .project
 .idea
@@ -26,6 +25,5 @@ config.json
 **/.DS_Store
 **/dump.rdb
 
-config.js
 
 npm-debug.log
