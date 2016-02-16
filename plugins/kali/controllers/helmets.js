@@ -61,7 +61,7 @@ module.exports = function HelmetModule(pb) {
                 helmetService.findByType('56bf79098daa054a1d1dd945', function(err, helmetsData){
                 //var articleService = new pb.ArticleService(self.site, true);
                 //articleService.getMetaInfo(data.content[0], function(err, meta) {
-                    console.log(helmetsData);
+
                     self.ts.reprocess = false;
                     //self.ts.registerLocal('meta_keywords', meta.keywords);
                     //self.ts.registerLocal('meta_desc', data.section.description || meta.description);
@@ -313,6 +313,17 @@ module.exports = function HelmetModule(pb) {
     HelmetController.prototype.renderHelmet = function(content, contentSettings, themeSettings, index, cb) {
         var self = this;
 
+        var mediaService = new pb.MediaService();
+        mediaService.loadById(content["Hero Image 1"], function(err, md){
+            console.log(md);
+            console.log(err);
+            if(util.isError(err) || md === null) {
+                cb(null, pb.config.siteName);
+                return;
+            }
+            ats.registerLocal('img', md.location);
+            ats.registerLocal('name', md.name);
+        });
         var isPage        = content.object_type === 'page';
         var showByLine    = contentSettings.display_bylines && !isPage;
         var showTimestamp = contentSettings.display_timestamp && !isPage;
