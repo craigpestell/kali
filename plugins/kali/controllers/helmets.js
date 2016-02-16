@@ -319,33 +319,9 @@ module.exports = function HelmetModule(pb) {
         var ats           = new pb.TemplateService(this.ls);
         var contentUrlPrefix = isPage ? '/page/' : '/article/';
         self.ts.reprocess = false;
-        ats.registerLocal('article_permalink', pb.UrlService.urlJoin(pb.config.siteRoot, contentUrlPrefix, content.url));
-        ats.registerLocal('article_headline', new pb.TemplateValue('<a href="' + pb.UrlService.urlJoin(contentUrlPrefix, content.url) + '">' + content.headline + '</a>', false));
-        ats.registerLocal('article_headline_nolink', content.headline);
-        ats.registerLocal('article_subheading', content.subheading ? content.subheading : '');
-        ats.registerLocal('article_subheading_display', content.subheading ? '' : 'display:none;');
-        ats.registerLocal('article_id', content[pb.DAO.getIdField()].toString());
-        ats.registerLocal('article_index', index);
-        ats.registerLocal('article_timestamp', showTimestamp && content.timestamp ? content.timestamp : '');
-        ats.registerLocal('article_timestamp_display', showTimestamp ? '' : 'display:none;');
-        ats.registerLocal('article_layout', new pb.TemplateValue(content.layout, false));
-        ats.registerLocal('article_url', content.url);
-        ats.registerLocal('display_byline', showByLine ? '' : 'display:none;');
-        ats.registerLocal('author_photo', content.author_photo ? content.author_photo : '');
-        ats.registerLocal('author_photo_display', content.author_photo ? '' : 'display:none;');
-        ats.registerLocal('author_name', content.author_name ? content.author_name : '');
-        ats.registerLocal('author_position', content.author_position ? content.author_position : '');
-        ats.registerLocal('media_body_style', content.media_body_style ? content.media_body_style : '');
-        ats.registerLocal('comments', function(flag, cb) {
-            if (content.object_type === 'page' || !contentSettings.allow_comments || !content.allow_comments) {
-                cb(null, '');
-                return;
-            }
+        ats.registerLocal('helmet_data', JSON.stringify(content));
+        ats.registerLocal('name', content.name);
 
-            self.renderComments(content, ats, function(err, comments) {
-                cb(err, new pb.TemplateValue(comments, false));
-            });
-        });
         ats.load('helmets_large_product', cb);
     };
 
