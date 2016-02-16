@@ -1,10 +1,28 @@
 ^tmp_head^
-<h1>Helmets TEMPLATE</h1>
-<div class="jumbotron">
-    <div class="container">
-        <h1>^loc_BIKE_HELMETS</h1>
-        <p>lets put some helmets here...</p>
-    </div>
-    ^tmp_helmets_large_product^
+<div class="hero" ng-if="hero_image">
+    <img class="hero_bg" ng-src="{{hero_image}}"/>
 </div>
-^tmp_footer^
+</div>
+<div ng-class="{container: true, standalone: !hero_image}">
+    <div class="row">
+        <div id="helmets" ng-class="{'col-sm-9': sideNavItems, 'col-sm-10 col-sm-offset-1': !sideNavItems}">
+            ^helmets^ ^helmets_data^
+        </div>
+
+        <div id="articles" ng-class="{'col-sm-9': sideNavItems, 'col-sm-10 col-sm-offset-1': !sideNavItems}">
+            ^articles^
+        </div>
+        <div class="col-sm-3" ng-if="sideNavItems">
+            ^side_nav^
+        </div>
+        <div ng-class="{'col-sm-9': sideNavItems, 'col-sm-10 col-sm-offset-1': !sideNavItems}">
+            <footer>
+                &copy; ^year^ ^site_name^
+            </footer>
+        </div>
+        <div class="spacer"></div>
+    </div>
+</div>
+^infinite_scroll^
+^angular^
+^tmp_footer_no_cp^
