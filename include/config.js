@@ -361,7 +361,7 @@ Configuration.getBaseConfig = function(multisite) {
             //The root media URL.  Example values: '//cdn.mydomain.com' or
             //'http://example-bucket.s3-website-us-east-1.amazonaws.com'.  Use this
             //if media is served from a domain other than the site root.
-            urlRoot: 'https://s3-us-west-1.amazonaws.com'
+            urlRoot: 'http://d31b3yephbs8ry.cloudfront.net/'
 
             //The maximum size of media files that can be uploaded to the server in
             //bytes
