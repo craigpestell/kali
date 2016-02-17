@@ -1,19 +1,19 @@
 /*
-    Copyright (C) 2015  PencilBlue, LLC
+ Copyright (C) 2015  PencilBlue, LLC
 
-    This program is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+ This program is free software: you can redistribute it and/or modify
+ it under the terms of the GNU General Public License as published by
+ the Free Software Foundation, either version 3 of the License, or
+ (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+ This program is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-*/
+ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
 
 //dependencies
 var util = require('./util.js');
@@ -27,7 +27,8 @@ module.exports = function LibrariesServiceModule(pb) {
      * @class LibrariesService
      * @constructor
      */
-    function LibrariesService(){}
+    function LibrariesService() {
+    }
 
     /**
      *
@@ -75,7 +76,10 @@ module.exports = function LibrariesServiceModule(pb) {
         ng_sortable_style_css: '/css/lib/ng-sortable/ng-sortable.style.min.css',
         ng_sortable_js: '/js/lib/ng-sortable/ng-sortable.min.js',
         rangy: '//rangy.googlecode.com/svn/trunk/currentrelease/rangy-core.js',
-        rangy_saverestore: '//rangy.googlecode.com/svn/trunk/currentrelease/rangy-selectionsaverestore.js'
+        rangy_saverestore: '//rangy.googlecode.com/svn/trunk/currentrelease/rangy-selectionsaverestore.js',
+        slick_css: '//cdn.jsdelivr.net/jquery.slick/1.5.9/slick.css',
+        slick_theme_css: '//cdn.jsdelivr.net/jquery.slick/1.5.9/slick-theme.css',
+        slick_js: '//cdn.jsdelivr.net/jquery.slick/1.5.9/slick.min.js'
     });
 
     /**
@@ -87,35 +91,38 @@ module.exports = function LibrariesServiceModule(pb) {
      * @type {Object}
      */
     var BOWER_DEFAULTS = Object.freeze({
-            jquery: '/bower_components/jquery/dist/jquery.min.js',
-            jquery_ui_js: '/bower_components/jqueryui/jquery-ui.min.js',
-            jquery_ui_css: '/bower_components/jqueryui/themes/ui-lightness/jquery-ui.min.css',
-            jquery_ui_touch_punch: '/bower_components/jqueryui-touch-punch/jquery.ui.touch-punch.min.js',
-            jquery_file_upload_js: '/bower_components/jquery-file-upload/js/jquery.fileupload.js',
-            jquery_file_upload_css: '/bower_components/jquery-file-upload/css/jquery.fileupload.css',
-            jquery_iframe_transport: '/bower_components/jquery.iframe-transport/jquery.iframe-transport.js',
-            jquery_datetime_picker_js: '/bower_components/datetimepicker/jquery.datetimepicker.js',
-            jquery_datetime_picker_css: '/bower_components/datetimepicker/jquery.datetimepicker.css',
-            jquery_validate: '/bower_components/jquery.validation/dist/jquery.validate.min.js',
-            bootstrap_js: '/bower_components/bootstrap/dist/js/bootstrap.min.js',
-            bootstrap_css: '/bower_components/bootstrap/dist/css/bootstrap.min.css',
-            font_awesome: '/bower_components/fontawesome/css/font-awesome.min.css',
-            angular: '/bower_components/angular/angular.min.js',
-            angular_route: '/bower_components/angular-route/angular-route.min.js',
-            angular_sanitize: '/bower_components/angular-sanitize/angular-sanitize.min.js',
-            spin: '/bower_components/jquery.spinjs/libs/spin/spin.js',
-            jquery_spin: '/bower_components/jquery.spinjs/dist/jquery.spin.min.js',
-            he: '/bower_components/he/he.js',
-            to_markdown: '/bower_components/to-markdown/src/to-markdown.js',
-            markdown: '/bower_components/markdown/lib/markdown.js',
-            angular_upload: '/bower_components/danialfarid-angular-file-upload/dist/angular-file-upload.min.js',
-            angular_upload_shim: '/bower_components/danialfarid-angular-file-upload/dist/angular-file-upload-shim.min.js',
-            ng_sortable_css: '/bower_components/ng-sortable/dist/ng-sortable.min.css',
-            ng_sortable_style_css: '/bower_components/ng-sortable/dist/ng-sortable.style.min.css',
-            ng_sortable_js: '/bower_components/ng-sortable/dist/ng-sortable.min.js',
-            rangy: '/bower_components/rangy-release/rangy-core.min.js',
-            rangy_saverestore: '/bower_components/rangy-release/rangy-selectionsaverestore.js'
-        });
+        jquery: '/bower_components/jquery/dist/jquery.min.js',
+        jquery_ui_js: '/bower_components/jqueryui/jquery-ui.min.js',
+        jquery_ui_css: '/bower_components/jqueryui/themes/ui-lightness/jquery-ui.min.css',
+        jquery_ui_touch_punch: '/bower_components/jqueryui-touch-punch/jquery.ui.touch-punch.min.js',
+        jquery_file_upload_js: '/bower_components/jquery-file-upload/js/jquery.fileupload.js',
+        jquery_file_upload_css: '/bower_components/jquery-file-upload/css/jquery.fileupload.css',
+        jquery_iframe_transport: '/bower_components/jquery.iframe-transport/jquery.iframe-transport.js',
+        jquery_datetime_picker_js: '/bower_components/datetimepicker/jquery.datetimepicker.js',
+        jquery_datetime_picker_css: '/bower_components/datetimepicker/jquery.datetimepicker.css',
+        jquery_validate: '/bower_components/jquery.validation/dist/jquery.validate.min.js',
+        bootstrap_js: '/bower_components/bootstrap/dist/js/bootstrap.min.js',
+        bootstrap_css: '/bower_components/bootstrap/dist/css/bootstrap.min.css',
+        font_awesome: '/bower_components/fontawesome/css/font-awesome.min.css',
+        angular: '/bower_components/angular/angular.min.js',
+        angular_route: '/bower_components/angular-route/angular-route.min.js',
+        angular_sanitize: '/bower_components/angular-sanitize/angular-sanitize.min.js',
+        spin: '/bower_components/jquery.spinjs/libs/spin/spin.js',
+        jquery_spin: '/bower_components/jquery.spinjs/dist/jquery.spin.min.js',
+        he: '/bower_components/he/he.js',
+        to_markdown: '/bower_components/to-markdown/src/to-markdown.js',
+        markdown: '/bower_components/markdown/lib/markdown.js',
+        angular_upload: '/bower_components/danialfarid-angular-file-upload/dist/angular-file-upload.min.js',
+        angular_upload_shim: '/bower_components/danialfarid-angular-file-upload/dist/angular-file-upload-shim.min.js',
+        ng_sortable_css: '/bower_components/ng-sortable/dist/ng-sortable.min.css',
+        ng_sortable_style_css: '/bower_components/ng-sortable/dist/ng-sortable.style.min.css',
+        ng_sortable_js: '/bower_components/ng-sortable/dist/ng-sortable.min.js',
+        rangy: '/bower_components/rangy-release/rangy-core.min.js',
+        rangy_saverestore: '/bower_components/rangy-release/rangy-selectionsaverestore.js',
+        slick_css: '/bower_components/slick-carousel/slick/slick.css',
+        slick_theme_css: '/bower_components/slick-carousel/slick/slick-theme.css',
+        slick_js: '/bower_components/slick-carousel/slick/slick.js'
+    });
 
     /**
      * Retrieves the library settings
@@ -123,15 +130,15 @@ module.exports = function LibrariesServiceModule(pb) {
      * @method getSettings
      * @param {Function} cb Callback function
      */
-    LibrariesService.prototype.getSettings = function(cb){
-        pb.settings.get(LIBRARIES_SETTINGS_REF, function(err, settings){
+    LibrariesService.prototype.getSettings = function (cb) {
+        pb.settings.get(LIBRARIES_SETTINGS_REF, function (err, settings) {
             if (settings) {
                 return cb(err, settings);
             }
 
             //set default settings if they don't exist
             settings = LibrariesService.getCDNDefaults();
-            pb.settings.set(LIBRARIES_SETTINGS_REF, settings, function(err, result) {
+            pb.settings.set(LIBRARIES_SETTINGS_REF, settings, function (err, result) {
                 cb(err, settings);
             });
         });
@@ -144,14 +151,14 @@ module.exports = function LibrariesServiceModule(pb) {
      * @method init
      * @param  {Function} cb Callback function
      */
-    LibrariesService.init = function(cb) {
+    LibrariesService.init = function (cb) {
         var instance = new LibrariesService();
-        instance.getSettings(function(err, settings) {
-            if(util.isError(err)) {
+        instance.getSettings(function (err, settings) {
+            if (util.isError(err)) {
                 return cb(err);
             }
 
-            Object.keys(settings).forEach(function(key) {
+            Object.keys(settings).forEach(function (key) {
                 pb.TemplateService.registerGlobal(key + '_src', settings[key]);
             });
             cb(null, true);
@@ -164,7 +171,7 @@ module.exports = function LibrariesServiceModule(pb) {
      * @method getCDNDefaults
      * @return {Object} CDN defaults
      */
-    LibrariesService.getCDNDefaults = function() {
+    LibrariesService.getCDNDefaults = function () {
         return util.clone(CDN_DEFAULTS);
     };
 
@@ -174,7 +181,7 @@ module.exports = function LibrariesServiceModule(pb) {
      * @method getBowerDefaults
      * @return {Object} Bower defaults
      */
-    LibrariesService.getBowerDefaults = function() {
+    LibrariesService.getBowerDefaults = function () {
         return util.clone(BOWER_DEFAULTS);
     };
 

@@ -21,10 +21,10 @@ var async = require('async');
 module.exports = function HelmetModule(pb) {
 
     //pb dependencies
-    var util           = pb.util;
-    var PluginService  = pb.PluginService;
-    var TopMenu        = pb.TopMenuService;
-    var Comments       = pb.CommentService;
+    var util = pb.util;
+    var PluginService = pb.PluginService;
+    var TopMenu = pb.TopMenuService;
+    var Comments = pb.CommentService;
     var ArticleService = pb.ArticleService;
 
     /**
@@ -33,10 +33,12 @@ module.exports = function HelmetModule(pb) {
      * @author Blake Callens <blake@pencilblue.org>
      * @copyright PencilBlue 2014, All rights reserved
      */
-    function HelmetController(){}
+    function HelmetController() {
+    }
+
     util.inherits(HelmetController, pb.BaseController);
 
-    HelmetController.prototype.init = function(props, cb) {
+    HelmetController.prototype.init = function (props, cb) {
         var self = this;
         pb.BaseController.prototype.init.call(self, props, function () {
             self.navService = new pb.SectionService({site: self.site});
@@ -45,22 +47,22 @@ module.exports = function HelmetModule(pb) {
         });
     };
 
-    HelmetController.prototype.render = function(cb) {
+    HelmetController.prototype.render = function (cb) {
         var self = this;
 
         //determine and execute the proper call
         var section = self.req.pencilblue_section || null;
-        var topic   = self.req.pencilblue_topic   || null;
+        var topic = self.req.pencilblue_topic || null;
         var article = self.req.pencilblue_article || null;
-        var page    = self.req.pencilblue_page    || null;
+        var page = self.req.pencilblue_page || null;
 
         var contentService = new pb.ContentService(self.site, true);
-        contentService.getSettings(function(err, contentSettings) {
-            self.gatherData(function(err, data) {
+        contentService.getSettings(function (err, contentSettings) {
+            self.gatherData(function (err, data) {
                 var helmetService = new pb.CustomObjectService(this.site, true);
-                helmetService.findByType('56bf79098daa054a1d1dd945', function(err, helmetsData){
-                //var articleService = new pb.ArticleService(self.site, true);
-                //articleService.getMetaInfo(data.content[0], function(err, meta) {
+                helmetService.findByType('56bf79098daa054a1d1dd945', function (err, helmetsData) {
+                    //var articleService = new pb.ArticleService(self.site, true);
+                    //articleService.getMetaInfo(data.content[0], function(err, meta) {
 
                     self.ts.reprocess = false;
                     //self.ts.registerLocal('meta_keywords', meta.keywords);
@@ -73,40 +75,40 @@ module.exports = function HelmetModule(pb) {
                     self.ts.registerLocal('current_url', self.req.url);
                     self.ts.registerLocal('navigation', new pb.TemplateValue(data.nav.navigation, false));
                     self.ts.registerLocal('account_buttons', new pb.TemplateValue(data.nav.accountButtons, false));
-                    self.ts.registerLocal('infinite_scroll', function(flag, cb) {
-                        if(article || page) {
+                    self.ts.registerLocal('infinite_scroll', function (flag, cb) {
+                        if (article || page) {
                             cb(null, '');
                         }
                         else {
                             var infiniteScrollScript = pb.ClientJs.includeJS('/js/infinite_article_scroll.js');
-                            if(section) {
+                            if (section) {
                                 infiniteScrollScript += pb.ClientJs.getJSTag('var infiniteScrollSection = "' + section + '";');
                             }
-                            else if(topic) {
+                            else if (topic) {
                                 infiniteScrollScript += pb.ClientJs.getJSTag('var infiniteScrollTopic = "' + topic + '";');
                             }
                             cb(null, new pb.TemplateValue(infiniteScrollScript, false));
                         }
                     });
 
-                    self.ts.registerLocal('helmets', function(flag, cb) {
-                        var tasks = util.getTasks(helmetsData, function(content, i) {
-                            return function(callback) {
+                    self.ts.registerLocal('helmets', function (flag, cb) {
+                        var tasks = util.getTasks(helmetsData, function (content, i) {
+                            return function (callback) {
                                 /*if (i >= contentSettings.articles_per_page) {//TODO, limit articles in query, not throug hackery
-                                    callback(null, '');
-                                    return;
-                                }*/
+                                 callback(null, '');
+                                 return;
+                                 }*/
                                 self.renderHelmet(content[i], contentSettings, data.nav.themeSettings, i, callback);
                             };
                         });
-                        async.parallel(tasks, function(err, result) {
+                        async.parallel(tasks, function (err, result) {
                             cb(err, new pb.TemplateValue(result.join(''), false));
                         });
                     });
 
-                    self.ts.registerLocal('articles', function(flag, cb) {
-                        var tasks = util.getTasks(data.content, function(content, i) {
-                            return function(callback) {
+                    self.ts.registerLocal('articles', function (flag, cb) {
+                        var tasks = util.getTasks(data.content, function (content, i) {
+                            return function (callback) {
                                 if (i >= contentSettings.articles_per_page) {//TODO, limit articles in query, not throug hackery
                                     callback(null, '');
                                     return;
@@ -114,34 +116,34 @@ module.exports = function HelmetModule(pb) {
                                 self.renderContent(content[i], contentSettings, data.nav.themeSettings, i, callback);
                             };
                         });
-                        async.parallel(tasks, function(err, result) {
+                        async.parallel(tasks, function (err, result) {
                             cb(err, new pb.TemplateValue(result.join(''), false));
                         });
                     });
-                    self.ts.registerLocal('page_name', function(flag, cb) {
+                    self.ts.registerLocal('page_name', function (flag, cb) {
                         self.getContentSpecificPageName(util.isArray(data.content) && data.content.length > 0 ? data.content[0] : null, cb);
                     });
 
-                    self.getSideNavigation(data.content, function(sideNavTemplate, sideNavItems) {
-                        self.ts.load(sideNavTemplate, function(err, sideNavTemplate) {
-                            if(util.isError(err)) {
+                    self.getSideNavigation(data.content, function (sideNavTemplate, sideNavItems) {
+                        self.ts.load(sideNavTemplate, function (err, sideNavTemplate) {
+                            if (util.isError(err)) {
                                 sideNavTemplate = '';
                             }
 
                             self.ts.registerLocal('side_nav', new pb.TemplateValue(sideNavTemplate, false));
 
-                            self.getTemplate(data.content, function(err, template) {
+                            self.getTemplate(data.content, function (err, template) {
                                 if (util.isError(err)) {
                                     throw err;
                                 }
 
-                                self.ts.registerLocal('angular', function(flag, cb) {
+                                self.ts.registerLocal('angular', function (flag, cb) {
 
-                                    var loggedIn       = pb.security.isAuthenticated(self.session);
+                                    var loggedIn = pb.security.isAuthenticated(self.session);
                                     var commentingUser = loggedIn ? Comments.getCommentingUser(self.session.authentication.user) : null;
-                                    var heroImage      = null;
-                                    if(data.content[0]) {
-                                        heroImage = data.content[0].hero_image ? data.content[0].hero_image: null;
+                                    var heroImage = null;
+                                    if (data.content[0]) {
+                                        heroImage = data.content[0].hero_image ? data.content[0].hero_image : null;
                                     }
 
                                     var objects = {
@@ -157,7 +159,7 @@ module.exports = function HelmetModule(pb) {
                                     var angularData = pb.ClientJs.getAngularController(objects, ['ngSanitize']);
                                     cb(null, angularData);
                                 });
-                                self.ts.load(template, function(err, result) {
+                                self.ts.load(template, function (err, result) {
                                     if (util.isError(err)) {
                                         throw err;
                                     }
@@ -165,8 +167,8 @@ module.exports = function HelmetModule(pb) {
                                     var loggedIn = pb.security.isAuthenticated(self.session);
                                     var commentingUser = loggedIn ? Comments.getCommentingUser(self.session.authentication.user) : null;
                                     var heroImage = null;
-                                    if(data.content[0]) {
-                                        heroImage = data.content[0].hero_image ? data.content[0].hero_image: null;
+                                    if (data.content[0]) {
+                                        heroImage = data.content[0].hero_image ? data.content[0].hero_image : null;
                                     }
                                     cb({content: result});
                                 });
@@ -179,7 +181,7 @@ module.exports = function HelmetModule(pb) {
     };
 
 
-    HelmetController.prototype.getTemplate = function(content, cb) {
+    HelmetController.prototype.getTemplate = function (content, cb) {
 
         //check if we should just use whatever default there is.
         //this could fall back to an active theme or the default pencilblue theme.
@@ -221,7 +223,7 @@ module.exports = function HelmetModule(pb) {
         else if (pieces.length <= 0) {
 
             //shit's broke. This should never be the case but better safe than sorry
-            cb(new Error("The content's template property provided an invalid value of ["+content.template+']'), null);
+            cb(new Error("The content's template property provided an invalid value of [" + content.template + ']'), null);
             return;
         }
 
@@ -242,45 +244,58 @@ module.exports = function HelmetModule(pb) {
     };
 
 
-    HelmetController.prototype.gatherData = function(cb) {
-        var self  = this;
+    HelmetController.prototype.gatherData = function (cb) {
+        var self = this;
         var tasks = {
 
             //navigation
-            nav: function(callback) {
-                self.getNavigation(function(themeSettings, navigation, accountButtons) {
-                    callback(null, {themeSettings: themeSettings, navigation: navigation, accountButtons: accountButtons});
+            nav: function (callback) {
+                self.getNavigation(function (themeSettings, navigation, accountButtons) {
+                    callback(null, {
+                        themeSettings: themeSettings,
+                        navigation: navigation,
+                        accountButtons: accountButtons
+                    });
                 });
             },
 
             //articles, pages, etc.
-            content: function(callback) {
+            content: function (callback) {
                 self.loadContent(callback);
             },
 
-            section: function(callback) {
-                if(!self.req.pencilblue_section) {
+            section: function (callback) {
+                if (!self.req.pencilblue_section) {
                     callback(null, {});
                     return;
                 }
 
                 self.siteQueryService.loadById(self.req.pencilblue_section, 'section', callback);
+            },
+            helmets: function (callback) {
+                self.getHelmets(callback)
             }
         };
         async.parallel(tasks, cb);
     };
 
-    HelmetController.prototype.loadContent = function(articleCallback) {
+    HelmetController.prototype.getHelmets = function (callback) {
+        var helmetService = new pb.CustomObjectService(this.site, true);
+        helmetService.findByType('56bf79098daa054a1d1dd945', callback);
+
+    };
+
+    HelmetController.prototype.loadContent = function (articleCallback) {
 
         var section = this.req.pencilblue_section || null;
-        var topic   = this.req.pencilblue_topic   || null;
+        var topic = this.req.pencilblue_topic || null;
         var article = this.req.pencilblue_article || null;
-        var page    = this.req.pencilblue_page    || null;
+        var page = this.req.pencilblue_page || null;
 
         var service = new ArticleService(this.site, true);
-        if(this.req.pencilblue_preview) {
-            if(this.req.pencilblue_preview == page || article) {
-                if(page) {
+        if (this.req.pencilblue_preview) {
+            if (this.req.pencilblue_preview == page || article) {
+                if (page) {
                     service.setContentType('page');
                 }
                 var where = pb.DAO.getIdWhere(page || article);
@@ -292,42 +307,42 @@ module.exports = function HelmetModule(pb) {
                 service.find({}, articleCallback);
             }
         }
-        else if(section) {
+        else if (section) {
             service.findBySection(section, articleCallback);
         }
-        else if(topic) {
+        else if (topic) {
             service.findByTopic(topic, articleCallback);
         }
-        else if(article) {
+        else if (article) {
             service.findById(article, articleCallback);
         }
-        else if(page) {
+        else if (page) {
             service.setContentType('page');
             service.findById(page, articleCallback);
         }
-        else{
+        else {
             service.find({}, articleCallback);
         }
     };
 
-    HelmetController.prototype.renderHelmet = function(content, contentSettings, themeSettings, index, cb) {
+    HelmetController.prototype.renderHelmet = function (content, contentSettings, themeSettings, index, cb) {
         var self = this;
 
         var mediaService = new pb.MediaService();
-        mediaService.loadById(content["Hero Image 1"], function(err, md){
-            console.log(md);
-            console.log(err);
-            if(util.isError(err) || md === null) {
+        mediaService.loadById(content["Hero Image 1"], function (err, md) {
+            //console.log(md);
+            //console.log(err);
+            if (util.isError(err) || md === null) {
                 cb(null, pb.config.siteName);
                 return;
             }
             ats.registerLocal('img', md.location);
             ats.registerLocal('name', md.name);
         });
-        var isPage        = content.object_type === 'page';
-        var showByLine    = contentSettings.display_bylines && !isPage;
+        var isPage = content.object_type === 'page';
+        var showByLine = contentSettings.display_bylines && !isPage;
         var showTimestamp = contentSettings.display_timestamp && !isPage;
-        var ats           = new pb.TemplateService(this.ls);
+        var ats = new pb.TemplateService(this.ls);
         var contentUrlPrefix = isPage ? '/page/' : '/article/';
         self.ts.reprocess = false;
         ats.registerLocal('helmet_data', JSON.stringify(content));
@@ -337,13 +352,13 @@ module.exports = function HelmetModule(pb) {
     };
 
 
-    HelmetController.prototype.renderContent = function(content, contentSettings, themeSettings, index, cb) {
+    HelmetController.prototype.renderContent = function (content, contentSettings, themeSettings, index, cb) {
         var self = this;
 
-        var isPage        = content.object_type === 'page';
-        var showByLine    = contentSettings.display_bylines && !isPage;
+        var isPage = content.object_type === 'page';
+        var showByLine = contentSettings.display_bylines && !isPage;
         var showTimestamp = contentSettings.display_timestamp && !isPage;
-        var ats           = new pb.TemplateService(this.ls);
+        var ats = new pb.TemplateService(this.ls);
         var contentUrlPrefix = isPage ? '/page/' : '/article/';
         self.ts.reprocess = false;
         ats.registerLocal('article_permalink', pb.UrlService.urlJoin(pb.config.siteRoot, contentUrlPrefix, content.url));
@@ -363,27 +378,27 @@ module.exports = function HelmetModule(pb) {
         ats.registerLocal('author_name', content.author_name ? content.author_name : '');
         ats.registerLocal('author_position', content.author_position ? content.author_position : '');
         ats.registerLocal('media_body_style', content.media_body_style ? content.media_body_style : '');
-        ats.registerLocal('comments', function(flag, cb) {
+        ats.registerLocal('comments', function (flag, cb) {
             if (content.object_type === 'page' || !contentSettings.allow_comments || !content.allow_comments) {
                 cb(null, '');
                 return;
             }
 
-            self.renderComments(content, ats, function(err, comments) {
+            self.renderComments(content, ats, function (err, comments) {
                 cb(err, new pb.TemplateValue(comments, false));
             });
         });
         ats.load('elements/article', cb);
     };
 
-    HelmetController.prototype.renderComments = function(content, ts, cb) {
-        var self           = this;
+    HelmetController.prototype.renderComments = function (content, ts, cb) {
+        var self = this;
         var commentingUser = null;
-        if(pb.security.isAuthenticated(this.session)) {
+        if (pb.security.isAuthenticated(this.session)) {
             commentingUser = Comments.getCommentingUser(this.session.authentication.user);
         }
 
-        ts.registerLocal('user_photo', function(flag, cb) {
+        ts.registerLocal('user_photo', function (flag, cb) {
             if (commentingUser) {
                 cb(null, commentingUser.photo ? commentingUser.photo : '');
             }
@@ -391,7 +406,7 @@ module.exports = function HelmetModule(pb) {
                 cb(null, '');
             }
         });
-        ts.registerLocal('user_position', function(flag, cb) {
+        ts.registerLocal('user_position', function (flag, cb) {
             if (commentingUser && util.isArray(commentingUser.position) && commentingUser.position.length > 0) {
                 cb(null, ', ' + commentingUser.position);
             }
@@ -403,25 +418,25 @@ module.exports = function HelmetModule(pb) {
         ts.registerLocal('display_submit', commentingUser ? 'block' : 'none');
         ts.registerLocal('display_login', commentingUser ? 'none' : 'block');
         ts.registerLocal('comments_length', util.isArray(content.comments) ? content.comments.length : 0);
-        ts.registerLocal('individual_comments', function(flag, cb) {
+        ts.registerLocal('individual_comments', function (flag, cb) {
             if (!util.isArray(content.comments) || content.comments.length == 0) {
                 cb(null, '');
                 return;
             }
 
-            var tasks = util.getTasks(content.comments, function(comments, i) {
-                return function(callback) {
+            var tasks = util.getTasks(content.comments, function (comments, i) {
+                return function (callback) {
                     self.renderComment(comments[i], callback);
                 };
             });
-            async.parallel(tasks, function(err, results) {
+            async.parallel(tasks, function (err, results) {
                 cb(err, new pb.TemplateValue(results.join(''), false));
             });
         });
         ts.load('elements/comments', cb);
     };
 
-    HelmetController.prototype.renderComment = function(comment, cb) {
+    HelmetController.prototype.renderComment = function (comment, cb) {
 
         var cts = new pb.TemplateService(this.ls);
         cts.reprocess = false;
@@ -434,20 +449,20 @@ module.exports = function HelmetModule(pb) {
         cts.load('elements/comments/comment', cb);
     };
 
-    HelmetController.prototype.getContentSpecificPageName = function(content, cb) {
+    HelmetController.prototype.getContentSpecificPageName = function (content, cb) {
 
 
-        if(this.req.pencilblue_article || this.req.pencilblue_page) {
+        if (this.req.pencilblue_article || this.req.pencilblue_page) {
             cb(null, content.headline + ' | ' + pb.config.siteName);
         }
-        else if(searchId = this.req.pencilblue_section || this.req.pencilblue_topic) {
+        else if (searchId = this.req.pencilblue_section || this.req.pencilblue_topic) {
 
             var objType = this.req.pencilblue_section ? 'section' : 'topic';
-            if(this.req.pencilblue_topic) {
+            if (this.req.pencilblue_topic) {
                 searchId = searchId.toString();
             }
-            this.siteQueryService.loadById(searchId, objType, function(err, obj) {
-                if(util.isError(err) || obj === null) {
+            this.siteQueryService.loadById(searchId, objType, function (err, obj) {
+                if (util.isError(err) || obj === null) {
                     cb(null, pb.config.siteName);
                     return;
                 }
@@ -460,24 +475,24 @@ module.exports = function HelmetModule(pb) {
         }
     };
 
-    HelmetController.prototype.getNavigation = function(cb) {
+    HelmetController.prototype.getNavigation = function (cb) {
         var options = {
             currUrl: this.req.url,
             site: this.site
         };
-        TopMenu.getTopMenu(this.session, this.ls, options, function(themeSettings, navigation, accountButtons) {
-            TopMenu.getBootstrapNav(navigation, accountButtons, function(navigation, accountButtons) {
+        TopMenu.getTopMenu(this.session, this.ls, options, function (themeSettings, navigation, accountButtons) {
+            TopMenu.getBootstrapNav(navigation, accountButtons, function (navigation, accountButtons) {
                 cb(themeSettings, navigation, accountButtons);
             });
         });
     };
 
-    HelmetController.prototype.getSideNavigation = function(articles, cb) {
+    HelmetController.prototype.getSideNavigation = function (articles, cb) {
         var self = this;
 
         var pluginService = new pb.PluginService({site: this.site});
-        pluginService.getSetting('show_side_navigation', 'portfolio', function(err, showSideNavigation) {
-            if(!showSideNavigation) {
+        pluginService.getSetting('show_side_navigation', 'portfolio', function (err, showSideNavigation) {
+            if (!showSideNavigation) {
                 cb('', null);
                 return;
             }
@@ -485,22 +500,22 @@ module.exports = function HelmetModule(pb) {
             var topics = [];
             var articleIDs = [];
 
-            if(self.req.pencilblue_article) {
+            if (self.req.pencilblue_article) {
                 topics = articles[0].article_topics;
                 articleIDs = [articles[0][pb.DAO.getIdField()]];
             }
-            else if(self.req.pencilblue_page) {
+            else if (self.req.pencilblue_page) {
                 articleIDs = [];
-                for(i = 0; i < articles.length; i++) {
-                    for(j = 0; j < articles[i].page_topics.length; j++) {
+                for (i = 0; i < articles.length; i++) {
+                    for (j = 0; j < articles[i].page_topics.length; j++) {
                         topics.push(articles[i].page_topics[j]);
                     }
                 }
             }
             else {
-                for(var i = 0; i < articles.length; i++) {
+                for (var i = 0; i < articles.length; i++) {
                     articleIDs.push(articles[i][pb.DAO.getIdField()]);
-                    for(var j = 0; j < articles[i].article_topics.length; j++) {
+                    for (var j = 0; j < articles[i].article_topics.length; j++) {
                         topics.push(articles[i].article_topics[j]);
                     }
                 }
@@ -513,18 +528,18 @@ module.exports = function HelmetModule(pb) {
                 },
                 limit: 6
             };
-            self.siteQueryService.q('article', opts, function(err, relatedArticles) {
-                if(relatedArticles.length === 0) {
+            self.siteQueryService.q('article', opts, function (err, relatedArticles) {
+                if (relatedArticles.length === 0) {
 
                     opts = {
                         where: pb.DAO.ANYWHERE,
                         order: {name: 1}
                     };
-                    self.siteQueryService.q('topic', opts, function(err, topicObjects) {
+                    self.siteQueryService.q('topic', opts, function (err, topicObjects) {
                         var articleTopics = [];
-                        for(var i = 0; i < topics.length && articleTopics.length < 20; i++) {
-                            for(var j = 0; j < topicObjects.length; j++) {
-                                if(pb.DAO.areIdsEqual(topics[i], topicObjects[j][pb.DAO.getIdField()])) {
+                        for (var i = 0; i < topics.length && articleTopics.length < 20; i++) {
+                            for (var j = 0; j < topicObjects.length; j++) {
+                                if (pb.DAO.areIdsEqual(topics[i], topicObjects[j][pb.DAO.getIdField()])) {
                                     articleTopics.push(topicObjects[j]);
                                     topicObjects.splice(j, 1);
                                     break;
@@ -532,7 +547,7 @@ module.exports = function HelmetModule(pb) {
                             }
                         }
 
-                        for(i = 0; i < topicObjects.length && articleTopics.length < 20; i++) {
+                        for (i = 0; i < topicObjects.length && articleTopics.length < 20; i++) {
                             articleTopics.push(topicObjects[i]);
                         }
 
@@ -546,6 +561,37 @@ module.exports = function HelmetModule(pb) {
         });
     };
 
+    HelmetController.prototype.renderHelmets = function (cb) {
+
+        var self = this;
+        var category = this.pathVars.category || null;
+
+        var contentService = new pb.ContentService(self.site, true);
+        contentService.getSettings(function (err, contentSettings) {
+            self.gatherData(function (err, data) {
+                self.ts.registerLocal('helmets', function (flag, cb) {
+                    var tasks = util.getTasks(data.helmets, function (content, i) {
+                        return function (callback) {
+
+                            self.renderHelmet(content[i], contentSettings, data.nav.themeSettings, i, callback);
+                        };
+                    });
+                    async.parallel(tasks, function (err, result) {
+                        cb(err, new pb.TemplateValue(result.join(''), false));
+                    });
+
+
+                });
+                self.ts.load('helmets', function (err, result) {
+                    if (util.isError(err)) {
+                        throw err;
+                    }
+                    cb({content: result});
+                });
+            });
+
+        });
+    };
     /**
      * Provides the routes that are to be handled by an instance of this prototype.
      * The route provides a definition of path, permissions, authentication, and
@@ -558,13 +604,20 @@ module.exports = function HelmetModule(pb) {
      *
      * @param cb A callback of the form: cb(error, array of objects)
      */
-    HelmetController.getRoutes = function(cb) {
+    HelmetController.getRoutes = function (cb) {
         var routes = [
             {
                 method: 'get',
-                path: '/page/bike',
+                path: '/helmets',
                 auth_required: false,
                 content_type: 'text/html'
+            },
+            {
+                method: 'get',
+                path: '/helmets/:category',
+                auth_required: false,
+                content_type: 'text/html',
+                handler: 'renderHelmets'
             }
         ];
         cb(null, routes);
