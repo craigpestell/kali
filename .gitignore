@@ -9,6 +9,7 @@ coverage/
 out
 plugins/*
 !plugins/kali
+!plugins/s3-pencilblue
 !plugins/pencilblue
 !plugins/pencilblue/**
 !plugins/ga
