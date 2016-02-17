@@ -562,7 +562,7 @@ module.exports = function HelmetModule(pb) {
         var routes = [
             {
                 method: 'get',
-                path: '/page/bicycle',
+                path: '/page/bike',
                 auth_required: false,
                 content_type: 'text/html'
             }
