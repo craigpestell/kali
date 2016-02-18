@@ -280,6 +280,23 @@ module.exports = function HelmetModule(pb) {
     };
 
     HelmetController.prototype.getHelmets = function (callback) {
+        var category = this.pathVars.category || null;
+        if(category){
+            category = category.toLowerCase();
+            category = category.substr(0,1).toUpperCase() + category.substr(1);
+            this.service = new pb.PageService(this.getServiceContext());
+            this.service.getAll({where:{headline: category}},function(err, data){
+                console.log("Page data:");
+                console.log(data);
+                var pageId = data._id;
+
+
+            });
+        }
+
+
+
+
         var helmetService = new pb.CustomObjectService(this.site, true);
         helmetService.findByType('56bf79098daa054a1d1dd945', callback);
 
@@ -565,11 +582,10 @@ module.exports = function HelmetModule(pb) {
 
         var self = this;
 
-        var category = this.pathVars.category || null;
-
         var contentService = new pb.ContentService(self.site, true);
         contentService.getSettings(function (err, contentSettings) {
             self.gatherData(function (err, data) {
+                console.log(data.helmets);
                 self.ts.registerLocal('navigation', new pb.TemplateValue(data.nav.navigation, false));
                 self.ts.registerLocal('helmet_slide', function (flag, cb) {
                     var tasks = util.getTasks(data.helmets, function (content, i) {

@@ -162,7 +162,7 @@ module.exports = function(pb) {
     var GLOBAL_CALLBACKS = {
         site_root: pb.config.siteRoot,
         site_name: pb.config.siteName,
-        site_menu_logo: '/img/KALILogoClean200px.png',
+        site_menu_logo: '/img/kali-170.jpg',
         version: pb.config.version
     };
 
