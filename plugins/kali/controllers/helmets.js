@@ -331,12 +331,13 @@ module.exports = function HelmetModule(pb) {
         var mediaService = new pb.MediaService();
         mediaService.loadById(content["Hero Image 1"], function (err, md) {
             //console.log(md);
-            //console.log(err);
+            console.log(err);
+            //console.log(pb.config.media.urlRoot);
             if (util.isError(err) || md === null) {
                 cb(null, pb.config.siteName);
                 return;
             }
-            ats.registerLocal('img', md.location);
+            ats.registerLocal('img', pb.config.media.urlRoot + md.location);
             ats.registerLocal('name', md.name);
         });
         var isPage = content.object_type === 'page';
@@ -350,7 +351,6 @@ module.exports = function HelmetModule(pb) {
 
         ats.load('helmets_large_product', cb);
     };
-
 
     HelmetController.prototype.renderContent = function (content, contentSettings, themeSettings, index, cb) {
         var self = this;
@@ -564,24 +564,29 @@ module.exports = function HelmetModule(pb) {
     HelmetController.prototype.renderHelmets = function (cb) {
 
         var self = this;
+
         var category = this.pathVars.category || null;
 
         var contentService = new pb.ContentService(self.site, true);
         contentService.getSettings(function (err, contentSettings) {
             self.gatherData(function (err, data) {
-                self.ts.registerLocal('helmets', function (flag, cb) {
+                self.ts.registerLocal('navigation', new pb.TemplateValue(data.nav.navigation, false));
+                self.ts.registerLocal('helmet_slide', function (flag, cb) {
                     var tasks = util.getTasks(data.helmets, function (content, i) {
                         return function (callback) {
 
-                            self.renderHelmet(content[i], contentSettings, data.nav.themeSettings, i, callback);
+                            self.renderHelmetSlide(content[i], contentSettings, data.nav.themeSettings, i, callback);
                         };
                     });
                     async.parallel(tasks, function (err, result) {
+                        console.log('result:', result);
                         cb(err, new pb.TemplateValue(result.join(''), false));
                     });
 
 
                 });
+
+
                 self.ts.load('helmets', function (err, result) {
                     if (util.isError(err)) {
                         throw err;
@@ -589,6 +594,29 @@ module.exports = function HelmetModule(pb) {
                     cb({content: result});
                 });
             });
+
+        });
+    };
+
+    HelmetController.prototype.renderHelmetSlide = function (content, contentSettings, themeSettings, index, cb) {
+        var self = this;
+
+        var mediaService = new pb.MediaService();
+        mediaService.loadById(content["Hero Image 1"], function (err, md) {
+            if (util.isError(err) || md === null) {
+                cb(null, pb.config.siteName);
+                return;
+            }
+            var isPage = content.object_type === 'page';
+            var showByLine = contentSettings.display_bylines && !isPage;
+            var showTimestamp = contentSettings.display_timestamp && !isPage;
+            var ats = new pb.TemplateService(this.ls);
+            var contentUrlPrefix = isPage ? '/page/' : '/article/';
+            self.ts.reprocess = false;
+            ats.registerLocal('img', pb.config.media.urlRoot + md.location);
+            ats.registerLocal('name', md.name);
+            //ats.registerLocal('name', content.name);
+            ats.load('helmet_slide', cb);
 
         });
     };

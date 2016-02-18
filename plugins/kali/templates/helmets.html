@@ -1,4 +1,41 @@
 ^tmp_head^
+
+<div class="nav-slider" data-slick='{"slidesToShow": 4, "slidesToScroll": 4}'>
+    ^helmet_slide^
+    <div><h3>fake slide</h3></div>
+</div>
+<script>
+    $(".nav-slider").slick({
+
+        // normal options...
+        infinite: false,
+
+        // the magic
+        responsive: [{
+
+            breakpoint: 1024,
+            settings: {
+                slidesToShow: 3,
+                infinite: true
+            }
+
+        }, {
+
+            breakpoint: 600,
+            settings: {
+                slidesToShow: 2,
+                dots: true
+            }
+
+        }, {
+
+            breakpoint: 300,
+            settings: "unslick" // destroys slick
+
+        }]
+    });
+</script>
+
 <div class="hero" ng-if="hero_image">
     <img class="hero_bg" ng-src="{{hero_image}}"/>
 </div>
