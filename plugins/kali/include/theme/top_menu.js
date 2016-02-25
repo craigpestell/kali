@@ -60,7 +60,7 @@ module.exports = function KaliTopMenuServiceModule(pb) {
                         KaliTopMenuService.getHelmetData(formattedSections, function (err, formattedSectionsWithHelmets) {
                             // Add Helmets data to navigation
 
-                            console.log(formattedSectionsWithHelmets);
+                            //console.log(formattedSectionsWithHelmets);
 
                             callback(null, formattedSectionsWithHelmets);
                         });
@@ -96,19 +96,21 @@ module.exports = function KaliTopMenuServiceModule(pb) {
 
                 return function (callback) {
 
-                    var where = {where: {Sections: {$in: [data.uid]}}};
+                    var where = {where: {Sections: {$in: [data[i].uid]}}};
                     helmetService.findByType('56bf79098daa054a1d1dd945', where, function (err, helmetData) {
                         if (util.isError(err)) {
                             cb(null, pb.config.siteName);
                             return;
                         }
+                        if(helmetData.length) {
+                            KaliTopMenuService.getHelmetMedia(helmetData, function (err, helmetMedia) {
+                                //console.log(helmetMedia);
+                                helmetData.media = helmetMedia;
+                                formattedSections[i].helmets = helmetData;
+                            });
+                        }
+                        callback(null, formattedSections[i]);
 
-                        KaliTopMenuService.getHelmetMedia(helmetData, function (err, helmetMedia) {
-                            console.log(helmetMedia);
-                            helmetData.media = helmetMedia;
-                            formattedSections[i].helmets = helmetData;
-                            callback(null, formattedSections[i]);
-                        });
                     });
                 };
             });
@@ -126,7 +128,7 @@ KaliTopMenuService.getHelmetMedia = function (helmets, cb) {
         return function (callback) {
 
             mediaService.loadById(data[i]["Hero Image 1"], function (err, md) {
-                console.log('found image');
+
                 if (util.isError(err) || md === null) {
                     cb(null, pb.config.siteName);
                     return;
@@ -173,75 +175,44 @@ KaliTopMenuService.getBootstrapNav = function (navigation, accountButtons, optio
                         ts.load('elements/top_menu/slider_script', function (err, sliderScriptTemplate) {
 
                             var bootstrapNav = ' ';
+                            var subNav;
                             //var sliderScript = sliderScriptTemplate;
                             var sliderScriptAdded = false;
 
                             for (var i = 0; i < navigation.length; i++) {
+                                var dropdown = dropdownTemplate;
                                 if (navigation[i].dropdown) {
 
-                                    var subNav = ' ';
-                                    for (var j = 0; j < navigation[i].children.length; j++) {
-                                        if (!navigation[i].children[j]) {
-                                            continue;
+                                    if (navigation[i].helmets){
+                                        // Helmets exist for this navigation item. Build a slider
+                                        subNav = ' ';
+
+                                        navigation[i].helmets.forEach(function(helmet, h){
+                                            subNav = subNav.concat(sliderSlideTemplate);
+                                        });
+                                        dropdown = sliderTemplate;
+                                    } else {
+                                        subNav = ' ';
+                                        for(var j = 0; j < navigation[i].children.length; j++)
+                                        {
+                                            if(!navigation[i].children[j]) {
+                                                continue;
+                                            }
+
+                                            var childItem = linkTemplate;
+                                            childItem = childItem.split('^active^').join((navigation[i].children[j].active) ? 'active' : '');
+                                            childItem = childItem.split('^url^').join(navigation[i].children[j].url);
+                                            childItem = childItem.split('^new_tab^').join(navigation[i].children[j].new_tab ? '_blank' : '_self');
+                                            childItem = childItem.split('^name^').join(navigation[i].children[j].name);
+
+                                            subNav = subNav.concat(childItem);
                                         }
 
-                                        var childItem = linkTemplate;
-                                        childItem = childItem.split('^active^').join((navigation[i].children[j].active) ? 'active' : '');
-                                        childItem = childItem.split('^url^').join(navigation[i].children[j].url);
-                                        childItem = childItem.split('^new_tab^').join(navigation[i].children[j].new_tab ? '_blank' : '_self');
-                                        childItem = childItem.split('^name^').join(navigation[i].children[j].name);
-
-                                        subNav = subNav.concat(childItem);
                                     }
 
-                                    var dropdown = dropdownTemplate;
-                                    dropdown = sliderTemplate;
-                                    /*ts.load('elements/top_menu/slider_slide', function (err, sliderSlideTemplate) {
-
-                                     }*/
                                     //use index for unique slider css class names
                                     dropdown = dropdown.split('^index^').join(i);
 
-
-                                    if (sliderItems.indexOf(navigation[i].helmets) > -1) {
-                                        for(var h = 0; h < navigation[i].helmets.length; h++){
-
-                                        }
-                                        /*for (var j = 0; j < navigation[i].children.length; j++) {
-                                         if (navigation[i].children[j].item) {
-                                         for (var h = 0; h < navigation.helmetsData.length; h++) {
-                                         if (navigation.helmetsData[h].Page) {
-                                         for (var p = 0; p < navigation.helmetsData[h].Page.length; p++) {
-                                         if (navigation.helmetsData[h].Page == navigation[i].children[j].item) {
-                                         ts.registerLocal('slider_slide', function (flag, cb) {
-                                         var tasks = util.getTasks(navigation.helmetsData[h], function (content, i) {
-                                         return function (callback) {
-                                         self.renderSliderSlide(content[i], contentSettings, data.nav.themeSettings, i, callback);
-                                         };
-                                         });
-                                         async.parallel(tasks, function (err, result) {
-                                         cb(err, new pb.TemplateValue(result.join(''), false));
-                                         });
-                                         });
-
-                                         console.log('match found');
-                                         }
-
-                                         }
-                                         }
-                                         }
-                                         }
-                                         }*/
-
-                                        /*  if (sliderScriptAdded) {
-                                         sliderScript += sliderScriptTemplate.split('^index^').join(i);
-                                         } else {
-                                         sliderScript = sliderScriptTemplate.split('^index^').join(i);
-
-                                         }
-                                         sliderScriptAdded = true;*/
-                                        //bootstrapNav = bootstrapNav.concat(sliderTemplate);
-                                    }
                                     dropdown = dropdown.split('^navigation^').join(subNav);
                                     dropdown = dropdown.split('^active^').join((navigation[i].active) ? 'active' : '');
                                     dropdown = dropdown.split('^name^').join(navigation[i].name);
@@ -286,8 +257,6 @@ KaliTopMenuService.prototype.renderSliderSlide = function (content, contentSetti
 
     var mediaService = new pb.MediaService();
     mediaService.loadById(content["Hero Image 1"], function (err, md) {
-        //console.log(md);
-        //console.log(pb.config.media.urlRoot);
         if (util.isError(err) || md === null) {
             cb(null, pb.config.siteName);
             return;
@@ -322,7 +291,7 @@ KaliTopMenuService.getHelmetSlide = function (ts, helmetData) {
                 ts.registerLocal('img', pb.config.media.urlRoot + md.location);
 
                 slider = sliderTemplate.split('^slider_slide^').join(sliderSlideTemplate);
-                console.log(dropdown);
+
                 //ts.load('elements/top_menu/slider_script', function (err, sliderScriptTemplate) {
             });
         });
