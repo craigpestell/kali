@@ -17,13 +17,14 @@
 
 //dependencies
 var async = require('async');
+var path = require('path');
 
 module.exports = function HelmetModule(pb) {
 
     //pb dependencies
     var util = pb.util;
     var PluginService = pb.PluginService;
-    var TopMenu = pb.TopMenuService;
+    var TopMenu = require(path.join(pb.config.docRoot, '/plugins/kali/include/theme/top_menu'))(pb);//pb.TopMenuService;
     var Comments = pb.CommentService;
     var ArticleService = pb.ArticleService;
 
@@ -250,11 +251,12 @@ module.exports = function HelmetModule(pb) {
 
             //navigation
             nav: function (callback) {
-                self.getNavigation(function (themeSettings, navigation, accountButtons) {
+                self.getNavigation(function (themeSettings, navigation, accountButtons, sliderScript) {
                     callback(null, {
                         themeSettings: themeSettings,
                         navigation: navigation,
-                        accountButtons: accountButtons
+                        accountButtons: accountButtons,
+                        sliderScript: sliderScript
                     });
                 });
             },
@@ -271,9 +273,6 @@ module.exports = function HelmetModule(pb) {
                 }
 
                 self.siteQueryService.loadById(self.req.pencilblue_section, 'section', callback);
-            },
-            helmets: function (callback) {
-                self.getHelmets(callback)
             }
         };
         async.parallel(tasks, cb);
@@ -286,8 +285,7 @@ module.exports = function HelmetModule(pb) {
             category = category.substr(0,1).toUpperCase() + category.substr(1);
             this.service = new pb.PageService(this.getServiceContext());
             this.service.getAll({where:{headline: category}},function(err, data){
-                console.log("Page data:");
-                console.log(data);
+
                 var pageId = data._id;
 
 
@@ -348,7 +346,6 @@ module.exports = function HelmetModule(pb) {
         var mediaService = new pb.MediaService();
         mediaService.loadById(content["Hero Image 1"], function (err, md) {
             //console.log(md);
-            console.log(err);
             //console.log(pb.config.media.urlRoot);
             if (util.isError(err) || md === null) {
                 cb(null, pb.config.siteName);
@@ -497,9 +494,9 @@ module.exports = function HelmetModule(pb) {
             currUrl: this.req.url,
             site: this.site
         };
-        TopMenu.getTopMenu(this.session, this.ls, options, function (themeSettings, navigation, accountButtons) {
-            TopMenu.getBootstrapNav(navigation, accountButtons, function (navigation, accountButtons) {
-                cb(themeSettings, navigation, accountButtons);
+        TopMenu.getTopMenu(this.session, this.ls, options, function (themeSettings, navigation, accountButtons, sliderScript) {
+            TopMenu.getBootstrapNav(navigation, accountButtons, sliderScript, function (navigation, accountButtons, sliderScript) {
+                cb(themeSettings, navigation, accountButtons, sliderScript);
             });
         });
     };
@@ -585,8 +582,9 @@ module.exports = function HelmetModule(pb) {
         var contentService = new pb.ContentService(self.site, true);
         contentService.getSettings(function (err, contentSettings) {
             self.gatherData(function (err, data) {
-                console.log(data.helmets);
+
                 self.ts.registerLocal('navigation', new pb.TemplateValue(data.nav.navigation, false));
+                self.ts.registerLocal('sliderScript', new pb.TemplateValue(data.nav.sliderScript, false));
                 self.ts.registerLocal('helmet_slide', function (flag, cb) {
                     var tasks = util.getTasks(data.helmets, function (content, i) {
                         return function (callback) {
@@ -595,7 +593,6 @@ module.exports = function HelmetModule(pb) {
                         };
                     });
                     async.parallel(tasks, function (err, result) {
-                        console.log('result:', result);
                         cb(err, new pb.TemplateValue(result.join(''), false));
                     });
 

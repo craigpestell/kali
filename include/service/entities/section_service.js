@@ -319,6 +319,7 @@ module.exports = function SectionServiceModule(pb) {
                 var formattedSections = [];
                 for(var i = 0; i < sectionMap.length; i++) {
                     var section    = SectionService.getSectionData(sectionMap[i].uid, sections, currUrl);
+                    section.uid = sectionMap[i].uid;
                     if (util.isNullOrUndefined(section)) {
                         pb.log.error('SectionService: The navigation map is out of sync.  Root [%s] could not be found for site [%s].', sectionMap[i].uid, self.site);
                         continue;

@@ -1,39 +1,22 @@
-/*
- Copyright (C) 2015  PencilBlue, LLC
-
- This program is free software: you can redistribute it and/or modify
- it under the terms of the GNU General Public License as published by
- the Free Software Foundation, either version 3 of the License, or
- (at your option) any later version.
-
- This program is distributed in the hope that it will be useful,
- but WITHOUT ANY WARRANTY; without even the implied warranty of
- MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- GNU General Public License for more details.
-
- You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
+/**
+ * Extend the TopMenuService
+ *
  */
 
-//dependencies
 var async = require('async');
-var util  = require('../util.js');
 
-module.exports = function TopMenuServiceModule(pb) {
+module.exports = function KaliTopMenuServiceModule(pb) {
+    const sliderItems = ['BIKE', 'POWERSPORTS'];
 
-    //dependencies
-    var SectionService = pb.SectionService;
+    //pb dependencies
+    var util = pb.util;
 
-    /**
-     * Service for top menu navigation.
-     * NOTE: This is not for administrative pages.
-     *
-     * @module Services
-     * @submodule Theme
-     * @class TopMenuService
-     * @constructor
-     */
-    function TopMenuService(){}
+    function KaliTopMenuService() {
+    }
+
+
+    KaliTopMenuService.getAccountButtons = pb.TopMenuService.getAccountButtons;
+    //KaliTopMenuService.getTopMenu = pb.TopMenuService.getTopMenu;
 
     /**
      * Retrieves the theme settings, navigation data structure, and account buttons.
@@ -49,9 +32,9 @@ module.exports = function TopMenuServiceModule(pb) {
      * first are the theme's settings, the second is the navigation structure, and
      * the third is the account button structure.
      */
-    TopMenuService.getTopMenu = function(session, localizationService, options, cb) {
+    KaliTopMenuService.getTopMenu = function (session, localizationService, options, cb) {
         if (util.isFunction(options)) {
-            cb      = options;
+            cb = options;
             options = {
                 currUrl: null
             };
@@ -61,208 +44,342 @@ module.exports = function TopMenuServiceModule(pb) {
         }
 
         var siteUId = pb.SiteService.getCurrentSite(options.site);
-
-        var getTopMenu = function(session, localizationService, options, cb) {
+        //var helmetsData = KaliTopMenuService.getHelmetsData();
+        var getTopMenu = function (session, localizationService, options, cb) {
             var tasks = {
-                themeSettings: function(callback) {
+                themeSettings: function (callback) {
                     var settingService = pb.SettingServiceFactory.getService(siteUId);
-                    settingService.get('site_logo', function(err, logo) {
+                    settingService.get('site_logo', function (err, logo) {
                         callback(null, {site_logo: logo});
                     });
                 },
 
-                formattedSections: function(callback) {
-                    var sectionService = new SectionService({site: siteUId});
-                    sectionService.getFormattedSections(localizationService, options.currUrl, function(err, formattedSections) {
-                        callback(null, formattedSections);
+                formattedSections: function (callback) {
+                    var sectionService = new pb.SectionService({site: siteUId});
+                    sectionService.getFormattedSections(localizationService, options.currUrl, function (err, formattedSections) {
+                        KaliTopMenuService.getHelmetData(formattedSections, function (err, formattedSectionsWithHelmets) {
+                            // Add Helmets data to navigation
+
+                            console.log(formattedSectionsWithHelmets);
+
+                            callback(null, formattedSectionsWithHelmets);
+                        });
+
                     });
                 },
 
-                accountButtons: function(callback) {
-                    TopMenuService.getAccountButtons(session, localizationService, options.site, callback);
+                accountButtons: function (callback) {
+                    pb.TopMenuService.getAccountButtons(session, localizationService, options.site, callback);
                 }
             };
-            async.parallel(tasks, function(err, result) {
+            async.parallel(tasks, function (err, result) {
                 cb(result.themeSettings, result.formattedSections, result.accountButtons);
             });
+
+
         };
         getTopMenu(session, localizationService, options, cb);
     };
+    //util.inherits(KaliTopMenuService, pb.TopMenuService);
 
-    /**
-     * Retrieves the information needed to draw account buttons
-     * @static
-     * @method getAccountButtons
-     * @param {Object}   session
-     * @param {Object}   ls      The localization service
-     * @param {String}   [site]    The current site
-     * @param {Function} cb      Callback function
-     */
-    TopMenuService.getAccountButtons = function(session, ls, site, cb) {
-
-        if (util.isFunction(site)) {
-            cb = site;
-            site = pb.siteService.GLOBAL_SITE;
-        }
-
-        var contentService = new pb.ContentService({site: site});
-        contentService.getSettings(function(err, contentSettings) {
-            if (util.isError(err)) {
-                return cb(err);
+    KaliTopMenuService.getHelmetData = function (formattedSections, cb) {
+        var sectionService = new pb.SectionService({site: this.site}, true);
+        sectionService.settings.get('section_map', function (err, sectionMap) {
+            if (util.isError(err) || sectionMap == null) {
+                cb(err, []);
+                return;
             }
 
-            var accountButtons = [];
+            var helmetService = new pb.CustomObjectService(this.site, true);
 
-            if(contentSettings.allow_comments) {
-                if(pb.security.isAuthenticated(session)) {
-                    accountButtons = [
-                        {
-                            icon: 'user',
-                            title: ls.get('ACCOUNT'),
-                            href: '/user/manage_account'
-                        },
-                        {
-                            icon: 'rss',
-                            title: ls.get('SUBSCRIBE'),
-                            href: '/feed'
-                        },
-                        {
-                            icon: 'power-off',
-                            title: ls.get('LOGOUT'),
-                            href: '/actions/logout'
+            var tasks = util.getTasks(formattedSections, function (data, i) {
+
+                return function (callback) {
+
+                    var where = {where: {Sections: {$in: [data.uid]}}};
+                    helmetService.findByType('56bf79098daa054a1d1dd945', where, function (err, helmetData) {
+                        if (util.isError(err)) {
+                            cb(null, pb.config.siteName);
+                            return;
                         }
-                    ];
 
-                }
-                else {
-                    accountButtons =
-                        [
-                            {
-                                icon: 'user',
-                                title: ls.get('ACCOUNT'),
-                                href: '/user/sign_up'
-                            },
-                            {
-                                icon: 'rss',
-                                title: ls.get('SUBSCRIBE'),
-                                href: '/feed'
-                            }
-                        ];
-                }
-            }
-            else {
-                accountButtons =
-                    [
-                        {
-                            icon: 'rss',
-                            title: ls.get('SUBSCRIBE'),
-                            href: '/feed'
-                        }
-                    ];
-            }
-            cb(null, accountButtons);
+                        KaliTopMenuService.getHelmetMedia(helmetData, function (err, helmetMedia) {
+                            console.log(helmetMedia);
+                            helmetData.media = helmetMedia;
+                            formattedSections[i].helmets = helmetData;
+                            callback(null, formattedSections[i]);
+                        });
+                    });
+                };
+            });
+            async.parallel(tasks, function (err, result) {
+                cb(err, result);
+            });
         });
     };
 
-    /**
-     * Returns a bootstrap ready ul list for a nav element
-     * @static
-     * @method getBootstrapNav
-     * @param {Object}   navigation     Navigation object
-     * @param {Object}   accountButtons Account buttons object
-     * @param {Function} cb             Callback function
-     */
-    TopMenuService.getBootstrapNav = function(navigation, accountButtons, options, cb) {
-        if (util.isFunction(options)) {
-            cb = options;
-            options = {};
-        }
+KaliTopMenuService.getHelmetMedia = function (helmets, cb) {
+    var mediaService = new pb.MediaService();
 
-        var ts = new pb.TemplateService(options);
-        ts.load('elements/top_menu/link', function(err, linkTemplate) {
-            ts.load('elements/top_menu/dropdown', function(err, dropdownTemplate) {
-                ts.load('elements/top_menu/account_button', function(err, accountButtonTemplate) {
+    var tasks = util.getTasks(helmets, function (data, i) {
 
-                    var bootstrapNav = ' ';
-                    for(var i = 0; i < navigation.length; i++)
-                    {
-                        if(navigation[i].dropdown)
-                        {
-                            var subNav = ' ';
-                            for(var j = 0; j < navigation[i].children.length; j++)
-                            {
-                                if(!navigation[i].children[j]) {
-                                    continue;
+        return function (callback) {
+
+            mediaService.loadById(data[i]["Hero Image 1"], function (err, md) {
+                console.log('found image');
+                if (util.isError(err) || md === null) {
+                    cb(null, pb.config.siteName);
+                    return;
+                }
+                data[i].media = md;
+                if (data[i].Sections) {
+                    for (var j = 0; j < data[i].Sections.length; j++) {
+                        console.log(data[i].Sections[j]);
+                    }
+
+                }
+                callback(err, data[i]);
+            });
+
+        };
+    });
+    async.parallel(tasks, function (err, result) {
+        cb(err, result);
+    });
+};
+
+/**
+ * Returns a bootstrap ready ul list for a nav element
+ * @static
+ * @method getBootstrapNav
+ * @param {Object}   navigation     Navigation object
+ * @param {Object}   accountButtons Account buttons object
+ * @param {Function} cb             Callback function
+ */
+KaliTopMenuService.getBootstrapNav = function (navigation, accountButtons, options, cb) {
+    if (util.isFunction(options)) {
+        cb = options;
+        options = {};
+    }
+
+    var ts = new pb.TemplateService(options);
+    var mediaService = new pb.MediaService();
+
+    ts.load('elements/top_menu/link', function (err, linkTemplate) {
+        ts.load('elements/top_menu/dropdown', function (err, dropdownTemplate) {
+            ts.load('elements/top_menu/account_button', function (err, accountButtonTemplate) {
+                ts.load('elements/top_menu/slider', function (err, sliderTemplate) {
+                    ts.load('elements/top_menu/slider_slide', function (err, sliderSlideTemplate) {
+                        ts.load('elements/top_menu/slider_script', function (err, sliderScriptTemplate) {
+
+                            var bootstrapNav = ' ';
+                            //var sliderScript = sliderScriptTemplate;
+                            var sliderScriptAdded = false;
+
+                            for (var i = 0; i < navigation.length; i++) {
+                                if (navigation[i].dropdown) {
+
+                                    var subNav = ' ';
+                                    for (var j = 0; j < navigation[i].children.length; j++) {
+                                        if (!navigation[i].children[j]) {
+                                            continue;
+                                        }
+
+                                        var childItem = linkTemplate;
+                                        childItem = childItem.split('^active^').join((navigation[i].children[j].active) ? 'active' : '');
+                                        childItem = childItem.split('^url^').join(navigation[i].children[j].url);
+                                        childItem = childItem.split('^new_tab^').join(navigation[i].children[j].new_tab ? '_blank' : '_self');
+                                        childItem = childItem.split('^name^').join(navigation[i].children[j].name);
+
+                                        subNav = subNav.concat(childItem);
+                                    }
+
+                                    var dropdown = dropdownTemplate;
+                                    dropdown = sliderTemplate;
+                                    /*ts.load('elements/top_menu/slider_slide', function (err, sliderSlideTemplate) {
+
+                                     }*/
+                                    //use index for unique slider css class names
+                                    dropdown = dropdown.split('^index^').join(i);
+
+
+                                    if (sliderItems.indexOf(navigation[i].helmets) > -1) {
+                                        for(var h = 0; h < navigation[i].helmets.length; h++){
+
+                                        }
+                                        /*for (var j = 0; j < navigation[i].children.length; j++) {
+                                         if (navigation[i].children[j].item) {
+                                         for (var h = 0; h < navigation.helmetsData.length; h++) {
+                                         if (navigation.helmetsData[h].Page) {
+                                         for (var p = 0; p < navigation.helmetsData[h].Page.length; p++) {
+                                         if (navigation.helmetsData[h].Page == navigation[i].children[j].item) {
+                                         ts.registerLocal('slider_slide', function (flag, cb) {
+                                         var tasks = util.getTasks(navigation.helmetsData[h], function (content, i) {
+                                         return function (callback) {
+                                         self.renderSliderSlide(content[i], contentSettings, data.nav.themeSettings, i, callback);
+                                         };
+                                         });
+                                         async.parallel(tasks, function (err, result) {
+                                         cb(err, new pb.TemplateValue(result.join(''), false));
+                                         });
+                                         });
+
+                                         console.log('match found');
+                                         }
+
+                                         }
+                                         }
+                                         }
+                                         }
+                                         }*/
+
+                                        /*  if (sliderScriptAdded) {
+                                         sliderScript += sliderScriptTemplate.split('^index^').join(i);
+                                         } else {
+                                         sliderScript = sliderScriptTemplate.split('^index^').join(i);
+
+                                         }
+                                         sliderScriptAdded = true;*/
+                                        //bootstrapNav = bootstrapNav.concat(sliderTemplate);
+                                    }
+                                    dropdown = dropdown.split('^navigation^').join(subNav);
+                                    dropdown = dropdown.split('^active^').join((navigation[i].active) ? 'active' : '');
+                                    dropdown = dropdown.split('^name^').join(navigation[i].name);
+
+                                    bootstrapNav = bootstrapNav.concat(dropdown);
                                 }
+                                else {
+                                    var linkItem = linkTemplate;
+                                    linkItem = linkItem.split('^active^').join((navigation[i].active) ? 'active' : '');
+                                    linkItem = linkItem.split('^url^').join(navigation[i].url);
+                                    linkItem = linkItem.split('^new_tab^').join(navigation[i].new_tab ? '_blank' : '');
+                                    linkItem = linkItem.split('^name^').join(navigation[i].name);
 
-                                var childItem = linkTemplate;
-                                childItem = childItem.split('^active^').join((navigation[i].children[j].active) ? 'active' : '');
-                                childItem = childItem.split('^url^').join(navigation[i].children[j].url);
-                                childItem = childItem.split('^new_tab^').join(navigation[i].children[j].new_tab ? '_blank' : '_self');
-                                childItem = childItem.split('^name^').join(navigation[i].children[j].name);
-
-                                subNav = subNav.concat(childItem);
+                                    bootstrapNav = bootstrapNav.concat(linkItem);
+                                }
+                                //console.log('index:', i);
+                                //console.log(bootstrapNav);
                             }
 
-                            var dropdown = dropdownTemplate;
-                            dropdown = dropdown.split('^navigation^').join(subNav);
-                            dropdown = dropdown.split('^active^').join((navigation[i].active) ? 'active' : '');
-                            dropdown = dropdown.split('^name^').join(navigation[i].name);
+                            var buttons = ' ';
+                            for (i = 0; i < accountButtons.length; i++) {
+                                var button = accountButtonTemplate;
+                                button = button.split('^active^').join((accountButtons[i].active) ? 'active' : '');
+                                button = button.split('^url^').join(accountButtons[i].href);
+                                button = button.split('^title^').join(accountButtons[i].title);
+                                button = button.split('^icon^').join(accountButtons[i].icon);
 
-                            bootstrapNav = bootstrapNav.concat(dropdown);
-                        }
-                        else
-                        {
-                            var linkItem = linkTemplate;
-                            linkItem = linkItem.split('^active^').join((navigation[i].active) ? 'active' : '');
-                            linkItem = linkItem.split('^url^').join(navigation[i].url);
-                            linkItem = linkItem.split('^new_tab^').join(navigation[i].new_tab ? '_blank' : '');
-                            linkItem = linkItem.split('^name^').join(navigation[i].name);
-
-                            bootstrapNav = bootstrapNav.concat(linkItem);
-                        }
-                    }
-
-                    var buttons = ' ';
-                    for(i = 0; i < accountButtons.length; i++)
-                    {
-                        var button = accountButtonTemplate;
-                        button = button.split('^active^').join((accountButtons[i].active) ? 'active' : '');
-                        button = button.split('^url^').join(accountButtons[i].href);
-                        button = button.split('^title^').join(accountButtons[i].title);
-                        button = button.split('^icon^').join(accountButtons[i].icon);
-
-                        buttons = buttons.concat(button);
-                    }
-
-                    cb(bootstrapNav, buttons);
+                                buttons = buttons.concat(button);
+                            }
+                            //console.log(bootstrapNav);
+                            cb(bootstrapNav, buttons, sliderTemplate);
+                        });
+                    });
                 });
             });
         });
-    };
+    });
+};
 
-    /**
-     * @method getNavItems
-     * @param {Object} options
-     * @param {Localization} options.ls
-     * @param {String} options.activeTheme
-     * @param {Object} options.session
-     * @param {String} options.currUrl
-     * @param {Function} cb
-     */
-    TopMenuService.prototype.getNavItems = function(options, cb) {
-        TopMenuService.getTopMenu(options.session, options.ls, options, function(themeSettings, navigation, accountButtons) {
-            TopMenuService.getBootstrapNav(navigation, accountButtons, options, function(navigation, accountButtons) {
-                var navItems = {
-                    themeSettings: themeSettings,
-                    navigation: navigation,
-                    accountButtons: accountButtons
-                };
-                cb(null, navItems);
+KaliTopMenuService.prototype.renderSliderSlide = function (content, contentSettings, themeSettings, index, cb) {
+    var self = this;
+
+    var mediaService = new pb.MediaService();
+    mediaService.loadById(content["Hero Image 1"], function (err, md) {
+        //console.log(md);
+        //console.log(pb.config.media.urlRoot);
+        if (util.isError(err) || md === null) {
+            cb(null, pb.config.siteName);
+            return;
+        }
+        ats.registerLocal('img', pb.config.media.urlRoot + md.location);
+        ats.registerLocal('name', md.name);
+    });
+    var isPage = content.object_type === 'page';
+    var showByLine = contentSettings.display_bylines && !isPage;
+    var showTimestamp = contentSettings.display_timestamp && !isPage;
+    var ats = new pb.TemplateService(this.ls);
+    var contentUrlPrefix = isPage ? '/page/' : '/article/';
+    self.ts.reprocess = false;
+    ats.registerLocal('helmet_data', JSON.stringify(content));
+    ats.registerLocal('name', content.name);
+
+    ats.load('helmets_large_product', cb);
+};
+
+KaliTopMenuService.getHelmetSlide = function (ts, helmetData) {
+    var mediaService = pb.MediaService();
+    ts.load('elements/top_menu/slider', function (err, sliderTemplate) {
+        var slider = sliderTemplate;
+        ts.load('elements/top_menu/slider_slide', function (err, sliderSlideTemplate) {
+            mediaService.loadById(helmetsData["Hero Image 1"], function (err, md) {
+                if (util.isError(err) || md === null) {
+                    cb(null, pb.config.siteName);
+                    return;
+                }
+                //var contentUrlPrefix = isPage ? '/page/' : '/article/';
+
+                ts.registerLocal('img', pb.config.media.urlRoot + md.location);
+
+                slider = sliderTemplate.split('^slider_slide^').join(sliderSlideTemplate);
+                console.log(dropdown);
+                //ts.load('elements/top_menu/slider_script', function (err, sliderScriptTemplate) {
             });
         });
-    };
-
-    //exports
-    return TopMenuService;
+    });
 };
+
+KaliTopMenuService.getSliderScripts = function (navigation, options, cb) {
+    if (util.isFunction(options)) {
+        cb = options;
+        options = {};
+    }
+
+    var ts = new pb.TemplateService(options);
+    ts.load('elements/top_menu/slider_script', function (err, sliderScriptTemplate) {
+        var sliderScript = ' ';
+        Kali.TopMenuService.getTopMenu(options.session, options.ls, options, function (themeSettings, navigation, accountButtons) {
+            for (var i = 0; i < navigation.length; i++) {
+                if (navigation[i].dropdown && sliderItems.indexOf(navigation[i].name) > -1) {
+                    sliderScript.concat(sliderScriptTemplate.split('^index^').join(i));
+                }
+            }
+            cb(sliderScript);
+        });
+    });
+};
+
+KaliTopMenuService.getHelmetsData = function (callback) {
+    var helmetService = new pb.CustomObjectService(this.site, true);
+    var pageService = new pb.PageService();
+
+    helmetService.findByType('56bf79098daa054a1d1dd945', callback);
+};
+
+
+/**
+ * @method getNavItems
+ * @param {Object} options
+ * @param {Localization} options.ls
+ * @param {String} options.activeTheme
+ * @param {Object} options.session
+ * @param {String} options.currUrl
+ * @param {Function} cb
+ */
+KaliTopMenuService.prototype.getNavItems = function (options, cb) {
+    KaliTopMenuService.getTopMenu(options.session, options.ls, options, function (themeSettings, navigation, accountButtons) {
+        KaliTopMenuService.getBootstrapNav(navigation, accountButtons, options, function (navigation, accountButtons, sliderScript) {
+            var navItems = {
+                themeSettings: themeSettings,
+                navigation: navigation,
+                accountButtons: accountButtons,
+                sliderScript: sliderScript
+            };
+            cb(null, navItems);
+        });
+    });
+};
+//exports
+return KaliTopMenuService;
+}
+;

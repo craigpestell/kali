@@ -1,0 +1,9 @@
+.nav > li.slider.dropdown.open {
+    position: static;
+}
+.nav > li.slider.dropdown.open .dropdown-menu {
+    display:table; width: 100%; text-align: center; left:0; right:0;
+}
+.dropdown-menu .nav-slider>li {
+    display: table-cell;
+}
