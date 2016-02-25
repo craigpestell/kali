@@ -176,14 +176,14 @@ KaliTopMenuService.getBootstrapNav = function (navigation, accountButtons, optio
 
                             var bootstrapNav = ' ';
                             var subNav;
-                            //var sliderScript = sliderScriptTemplate;
+                            var sliderScript = sliderScriptTemplate;
                             var sliderScriptAdded = false;
 
                             for (var i = 0; i < navigation.length; i++) {
                                 var dropdown = dropdownTemplate;
                                 if (navigation[i].dropdown) {
 
-                                    if (navigation[i].helmets){
+                                    if (navigation[i].helmets && navigation[i].helmets.length){
                                         // Helmets exist for this navigation item. Build a slider
                                         subNav = ' ';
 
@@ -191,6 +191,15 @@ KaliTopMenuService.getBootstrapNav = function (navigation, accountButtons, optio
                                             subNav = subNav.concat(sliderSlideTemplate);
                                         });
                                         dropdown = sliderTemplate;
+
+                                        if (sliderScriptAdded) {
+                                            sliderScript += sliderScriptTemplate.split('^index^').join(i);
+                                        } else {
+                                            sliderScript = sliderScriptTemplate.split('^index^').join(i);
+
+                                        }
+                                        sliderScriptAdded = true;
+
                                     } else {
                                         subNav = ' ';
                                         for(var j = 0; j < navigation[i].children.length; j++)
@@ -243,86 +252,13 @@ KaliTopMenuService.getBootstrapNav = function (navigation, accountButtons, optio
                                 buttons = buttons.concat(button);
                             }
                             //console.log(bootstrapNav);
-                            cb(bootstrapNav, buttons, sliderTemplate);
+                            cb(bootstrapNav, buttons, sliderScript);
                         });
                     });
                 });
             });
         });
     });
-};
-
-KaliTopMenuService.prototype.renderSliderSlide = function (content, contentSettings, themeSettings, index, cb) {
-    var self = this;
-
-    var mediaService = new pb.MediaService();
-    mediaService.loadById(content["Hero Image 1"], function (err, md) {
-        if (util.isError(err) || md === null) {
-            cb(null, pb.config.siteName);
-            return;
-        }
-        ats.registerLocal('img', pb.config.media.urlRoot + md.location);
-        ats.registerLocal('name', md.name);
-    });
-    var isPage = content.object_type === 'page';
-    var showByLine = contentSettings.display_bylines && !isPage;
-    var showTimestamp = contentSettings.display_timestamp && !isPage;
-    var ats = new pb.TemplateService(this.ls);
-    var contentUrlPrefix = isPage ? '/page/' : '/article/';
-    self.ts.reprocess = false;
-    ats.registerLocal('helmet_data', JSON.stringify(content));
-    ats.registerLocal('name', content.name);
-
-    ats.load('helmets_large_product', cb);
-};
-
-KaliTopMenuService.getHelmetSlide = function (ts, helmetData) {
-    var mediaService = pb.MediaService();
-    ts.load('elements/top_menu/slider', function (err, sliderTemplate) {
-        var slider = sliderTemplate;
-        ts.load('elements/top_menu/slider_slide', function (err, sliderSlideTemplate) {
-            mediaService.loadById(helmetsData["Hero Image 1"], function (err, md) {
-                if (util.isError(err) || md === null) {
-                    cb(null, pb.config.siteName);
-                    return;
-                }
-                //var contentUrlPrefix = isPage ? '/page/' : '/article/';
-
-                ts.registerLocal('img', pb.config.media.urlRoot + md.location);
-
-                slider = sliderTemplate.split('^slider_slide^').join(sliderSlideTemplate);
-
-                //ts.load('elements/top_menu/slider_script', function (err, sliderScriptTemplate) {
-            });
-        });
-    });
-};
-
-KaliTopMenuService.getSliderScripts = function (navigation, options, cb) {
-    if (util.isFunction(options)) {
-        cb = options;
-        options = {};
-    }
-
-    var ts = new pb.TemplateService(options);
-    ts.load('elements/top_menu/slider_script', function (err, sliderScriptTemplate) {
-        var sliderScript = ' ';
-        Kali.TopMenuService.getTopMenu(options.session, options.ls, options, function (themeSettings, navigation, accountButtons) {
-            for (var i = 0; i < navigation.length; i++) {
-                if (navigation[i].dropdown && sliderItems.indexOf(navigation[i].name) > -1) {
-                    sliderScript.concat(sliderScriptTemplate.split('^index^').join(i));
-                }
-            }
-            cb(sliderScript);
-        });
-    });
-};
-
-KaliTopMenuService.getHelmetsData = function (callback) {
-    var helmetService = new pb.CustomObjectService(this.site, true);
-    var pageService = new pb.PageService();
-
-    helmetService.findByType('56bf79098daa054a1d1dd945', callback);
 };
 
 

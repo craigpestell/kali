@@ -75,6 +75,7 @@ module.exports = function HelmetModule(pb) {
                     //self.ts.registerLocal('meta_thumbnail', meta.thumbnail);
                     self.ts.registerLocal('current_url', self.req.url);
                     self.ts.registerLocal('navigation', new pb.TemplateValue(data.nav.navigation, false));
+                    self.ts.registerLocal('sliderScript', new pb.TemplateValue(data.nav.sliderScript, false));
                     self.ts.registerLocal('account_buttons', new pb.TemplateValue(data.nav.accountButtons, false));
                     self.ts.registerLocal('infinite_scroll', function (flag, cb) {
                         if (article || page) {
